@@ -1,0 +1,125 @@
+class Tree {
+
+  // member variables
+  //   all of these are given names starting with "m_" to make
+  //   it clear which variables are members variables of the 
+  //   Tree class and which are not (e.g. local variables, 
+  //   global variables and function/method parameters)
+  
+  int    m_lineLength;       // turtle line length
+  int    m_x;                // initial x position
+  int    m_y;                // initial y position
+  float  m_branchAngle_Right;      // turtle rotation at branch
+  float  m_branchAngle_Left;      // turtle rotation at branch
+  float  m_branchAngle;
+  float  m_initOrientation;  // initial orientation
+  String m_state;            // initial state
+  float  m_scaleFactor;      // branch scale factor
+  String m_F_rule;           // F-rule substitution
+  String m_H_rule;           // H-rule substitution
+  String m_f_rule;           // f-rule substitution
+  int    m_numIterations;    // number of times to substitute
+  
+  // constructor
+  // (d = line length, x & y = start position of drawing)
+  Tree(int d, int x, int y, float branchAngle, float branchAngle_Right, float branchAngle_Left, float initOrientation, String state, float scaleFactor, 
+  String F_rule, String H_rule, String f_rule, int numIterations) {
+    m_lineLength = d;
+    m_x = x;
+    m_y = y; 
+    m_branchAngle= branchAngle;
+    m_branchAngle_Right = branchAngle_Right;
+    m_branchAngle_Left = branchAngle_Left;
+    m_initOrientation = initOrientation;
+    m_state = state;
+    m_scaleFactor = scaleFactor;
+    m_F_rule = F_rule;
+    m_H_rule = H_rule;
+    m_f_rule = f_rule;
+    m_numIterations = numIterations;
+
+    // Perform L rounds of substitutions on the initial state
+    for (int k=0; k < m_numIterations; k++) {
+      m_state = substitute(m_state);
+    }
+  }
+  
+  void draw() {
+    pushMatrix();
+    pushStyle();
+    
+    stroke(0);
+    translate(m_x, m_y);        // initial position
+    rotate(m_initOrientation);  // initial rotation
+    
+    // now walk along the state string, executing the
+    // corresponding turtle command for each character
+    for (int i=0; i < m_state.length(); i++) {
+      turtle(m_state.charAt(i));
+    }
+    
+    popStyle();
+    popMatrix();
+  }
+  
+  // Turtle command definitions for each character in our alphabet
+  void turtle(char c) {
+    switch(c) {
+    case 'F': // drop through to next case
+    case 'H':
+    //line (0, 0, 0, m_lineLength);
+      rect(0, 0, m_lineLength, m_lineLength);
+      translate(0, m_lineLength);
+      break;
+    case 'f':
+      translate(0, m_lineLength);
+      break;
+      case 't':
+      translate(0, -m_lineLength);
+      break;
+    case 's':
+      scale(m_scaleFactor);
+      break;
+    case '&':
+      rotate(m_branchAngle);
+      break;
+    case '-':
+      rotate(m_branchAngle_Left);
+      break;
+    case '+':
+      rotate(m_branchAngle_Right);
+      break;
+    case '[':
+      pushMatrix();
+      break;
+    case ']':
+      popMatrix();
+      break;
+    default:
+      println("Bad character: " + c);
+      exit();
+    }
+  }
+  
+  // apply substitution rules to string s and return the resulting string
+  String substitute(String s) {
+    String newState = new String();
+    for (int j=0; j < s.length(); j++) {
+      switch (s.charAt(j)) {
+      case 'F':
+        newState += m_F_rule;
+        break;
+      case 'H':
+        newState += m_H_rule;
+        break;
+      case 'f':
+        newState += m_f_rule;
+        break;
+      default:
+        newState += s.charAt(j);
+      }
+    }
+    return newState;
+  }
+  
+}
